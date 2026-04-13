@@ -1,13 +1,13 @@
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-skyblue-800">
+    <main className="min-h-screen bg-[#f5f7fb] text-gray-800">
 
       {/* NAVBAR */}
       <header className="flex justify-between items-center px-10 py-5 bg-[#0f172a] text-white shadow">
         <h1 className="text-2xl font-bold">🐄 Gau Trust Milk</h1>
 
         <div className="flex gap-3">
-          <button className="bg-gray px-5 py-2 rounded-xl hover:bg-black-800">
+          <button className="bg-black px-5 py-2 rounded-xl hover:bg-gray-800">
             Customer Signup
           </button>
           <button className="bg-gray-700 px-5 py-2 rounded-xl hover:bg-black">
