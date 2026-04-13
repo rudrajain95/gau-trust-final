@@ -4,17 +4,26 @@ export default function Home() {
 
       {/* NAVBAR */}
       <header className="flex justify-between items-center px-10 py-5 bg-[#0f172a] text-white shadow">
-        <h1 className="text-2xl font-bold">🐄 Gau Trust Milk</h1>
+  <h1 className="text-2xl font-bold">🐄 Gau Trust Milk</h1>
 
-        <div className="flex gap-3">
-          <button className="bg-black px-5 py-2 rounded-xl hover:bg-gray-800">
-            Customer Signup
-          </button>
-          <button className="bg-gray-700 px-5 py-2 rounded-xl hover:bg-black">
-            Customer Login
-          </button>
-        </div>
-      </header>
+  <div className="flex gap-3">
+    
+    {/* SIGNUP BUTTON */}
+    <a href="/signup">
+      <button className="bg-black px-5 py-2 rounded-xl hover:bg-gray-800">
+        Customer Signup
+      </button>
+    </a>
+
+    {/* LOGIN BUTTON */}
+    <a href="/login">
+      <button className="bg-gray-700 px-5 py-2 rounded-xl hover:bg-black">
+        Customer Login
+      </button>
+    </a>
+
+  </div>
+</header>
 
 
       {/* HERO */}
