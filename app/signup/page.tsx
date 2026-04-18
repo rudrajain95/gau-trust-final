@@ -7,8 +7,13 @@ export default function Signup() {
   const [address, setAddress] = useState("");
 
   const handleSignup = () => {
-    alert("Signup Successful");
-    console.log({ name, mobile, address });
+    const user = { name, mobile, address };
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    alert("Signup Successful ✅");
+
+    window.location.href = "/login";
   };
 
   return (
