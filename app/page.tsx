@@ -1,92 +1,113 @@
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-gray-800">
+    <main className="min-h-screen bg-[#f8fafc] text-gray-800">
 
-      {/* NAVBAR */}
-      <header className="flex justify-between items-center px-10 py-5 bg-[#0f172a] text-white shadow">
-  <h1 className="text-2xl font-bold">🐄 Gau Trust Milk</h1>
+      {/* 🔥 NAVBAR */}
+      <header className="flex justify-between items-center px-10 py-5 bg-white shadow-sm">
+        <h1 className="text-2xl font-bold text-green-700">
+          🐄 Gau Trust Milk
+        </h1>
 
-  <div className="flex gap-3">
-    
-    {/* SIGNUP BUTTON */}
-    <a href="/signup">
-      <button className="bg-black px-5 py-2 rounded-xl hover:bg-gray-800">
-        Customer Signup
-      </button>
-    </a>
+        <div className="flex gap-3">
+          <a href="/login">
+            <button className="px-5 py-2 bg-gray-900 text-white rounded-xl hover:bg-black">
+              Secure Login
+            </button>
+          </a>
 
-    {/* LOGIN BUTTON */}
-    <a href="/login">
-      <button className="bg-gray-700 px-5 py-2 rounded-xl hover:bg-black">
-        Customer Login
-      </button>
-    </a>
-
-  </div>
-</header>
+          <a href="/signup">
+            <button className="px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700">
+              Create Account
+            </button>
+          </a>
+        </div>
+      </header>
 
 
-      {/* HERO */}
+      {/* 🔥 HERO */}
       <section className="py-24 px-10">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
 
-          {/* TEXT */}
           <div>
             <h1 className="text-5xl font-bold leading-tight text-gray-900">
-              शुद्ध और ताज़ा दूध <br />
-              अब सीधे आपके घर
+              शुद्ध और ताज़ा दूध  
+              <br /> अब सीधे आपके घर
             </h1>
 
             <p className="mt-6 text-lg text-gray-600">
-              Gau Trust Milk आपको भरोसेमंद डेयरी फार्म से सीधे आपके घर तक ताज़ा दूध पहुंचाता है।
+              Gau Trust Milk एक भरोसेमंद डेयरी प्लेटफॉर्म है जो आपको  
+              सीधे फार्म और लोकल सप्लायर्स से ताज़ा दूध और डेयरी प्रोडक्ट्स  
+              आपके घर तक पहुंचाता है।
             </p>
 
             <p className="mt-2 text-gray-500">
-              हर दिन Farm Video — पूरा भरोसा।
+              हर दिन farm video updates के साथ पूरी पारदर्शिता।
             </p>
 
             <div className="flex gap-4 mt-8">
-              <button className="bg-black text-white px-8 py-3 rounded-xl shadow hover:bg-gray-800">
-                Start Free Trial
-              </button>
-              <button className="bg-gray-900 text-white px-8 py-3 rounded-xl shadow hover:bg-black">
-                Customer Login
-              </button>
+              <a href="/signup">
+                <button className="bg-green-600 text-white px-8 py-3 rounded-xl shadow hover:bg-green-700">
+                  अभी शुरू करें
+                </button>
+              </a>
+
+              <a href="/login">
+                <button className="bg-gray-900 text-white px-8 py-3 rounded-xl shadow hover:bg-black">
+                  लॉगिन करें
+                </button>
+              </a>
             </div>
           </div>
 
-          {/* IMAGE */}
           <img
             src="/milk.jpg"
-            className="w-full rounded-2xl shadow-2xl"
+            className="w-full rounded-2xl shadow-xl"
           />
         </div>
       </section>
 
 
-      {/* WHY */}
-      <section className="px-10 py-20">
+      {/* 🔥 TRUST SECTION */}
+      <section className="px-10 py-20 bg-white">
         <h2 className="text-4xl font-bold text-center mb-14">
           ग्राहक Gau Trust पर भरोसा क्यों करते हैं?
         </h2>
 
         <div className="grid md:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {[
-            { title: "📹 Farm Transparency", desc: "हर दिन दूध का वीडियो मिलता है" },
-            { title: "🥛 Fresh Dairy", desc: "सीधे फार्म से ताज़ा दूध" },
-            { title: "🏪 Nearby Shop", desc: "पास की डेयरी से ऑर्डर" },
-            { title: "🚚 Fast Delivery", desc: "समय पर डिलीवरी" },
-          ].map((item, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition">
-              <h3 className="font-bold text-lg">{item.title}</h3>
-              <p className="mt-2 text-gray-600">{item.desc}</p>
-            </div>
-          ))}
+
+          <div className="bg-gray-50 p-6 rounded-2xl shadow hover:shadow-lg">
+            <h3 className="font-bold text-lg">📹 Farm Transparency</h3>
+            <p className="mt-2 text-gray-600">
+              हर दिन दूध का सोर्स वीडियो में देखें
+            </p>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-2xl shadow hover:shadow-lg">
+            <h3 className="font-bold text-lg">🥛 Fresh Dairy</h3>
+            <p className="mt-2 text-gray-600">
+              सीधे फार्म से ताज़ा दूध और प्रोडक्ट्स
+            </p>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-2xl shadow hover:shadow-lg">
+            <h3 className="font-bold text-lg">🏪 Nearby Shop</h3>
+            <p className="mt-2 text-gray-600">
+              अपने नजदीकी डेयरी शॉप से ऑर्डर करें
+            </p>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-2xl shadow hover:shadow-lg">
+            <h3 className="font-bold text-lg">🚚 Reliable Delivery</h3>
+            <p className="mt-2 text-gray-600">
+              समय पर और सुरक्षित डिलीवरी
+            </p>
+          </div>
+
         </div>
       </section>
 
 
-      {/* DELIVERY */}
+      {/* 🔥 DELIVERY POLICY */}
       <section className="px-10 py-20 bg-gray-100">
         <h2 className="text-4xl font-bold text-center mb-14">
           Delivery Policy
@@ -96,7 +117,7 @@ export default function Home() {
 
           <div className="bg-white p-8 rounded-2xl shadow border-l-4 border-green-500">
             <h3 className="font-bold text-lg">⭐ Subscription Customers</h3>
-            <p className="mt-2">Same day delivery</p>
+            <p className="mt-2">Same day delivery available</p>
             <p className="font-semibold">6 AM – 9 PM</p>
           </div>
 
@@ -110,43 +131,47 @@ export default function Home() {
       </section>
 
 
-      {/* PRODUCTS */}
-      <section className="px-10 py-20 text-center">
+      {/* 🔥 PRODUCTS */}
+      <section className="px-10 py-20 text-center bg-white">
         <h2 className="text-4xl font-bold mb-14">
           हमारे डेयरी प्रोडक्ट्स
         </h2>
 
         <div className="grid md:grid-cols-5 gap-6 max-w-6xl mx-auto">
+
           {["Milk", "Paneer", "Curd", "Butter Milk", "Butter"].map((item) => (
-            <div key={item} className="bg-white py-6 rounded-xl shadow hover:shadow-xl">
+            <div key={item} className="bg-gray-50 py-6 rounded-xl shadow hover:shadow-lg">
               {item}
             </div>
           ))}
+
         </div>
       </section>
 
 
-      {/* CTA */}
-      <section className="bg-[#0f172a] text-white text-center py-20">
+      {/* 🔥 CTA */}
+      <section className="bg-green-700 text-white text-center py-20">
         <h2 className="text-4xl font-bold">
           आज ही Gau Trust से जुड़ें
         </h2>
 
-        <p className="mt-3 text-gray-300">
-          शुद्ध दूध और भरोसे के साथ सेवा पाएं।
+        <p className="mt-3">
+          शुद्ध दूध, सही कीमत और पूरी पारदर्शिता के साथ
         </p>
 
-        <button className="mt-8 bg-black px-8 py-3 rounded-xl hover:bg-gray-800">
-          Create Customer Account
-        </button>
+        <a href="/signup">
+          <button className="mt-8 bg-white text-green-700 px-8 py-3 rounded-xl font-semibold">
+            Create Customer Account
+          </button>
+        </a>
       </section>
 
 
-      {/* FOOTER */}
+      {/* 🔥 FOOTER */}
       <footer className="bg-black text-white text-center py-6">
         <p>© 2026 Gau Trust Milk</p>
         <p className="text-gray-400 text-sm">
-          छतरपुर में ताज़ा दूध डिलीवरी सेवा
+        छतरपुर में ताज़ा दूध डिलीवरी सेवा
         </p>
       </footer>
 
