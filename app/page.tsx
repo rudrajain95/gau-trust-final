@@ -146,7 +146,7 @@ export default function Home() {
       <footer className="bg-black text-white text-center py-6">
         <p>© 2026 Gau Trust Milk</p>
         <p className="text-gray-400 text-sm">
-          Chhatarpur में ताज़ा दूध डिलीवरी
+          छतरपुर में ताज़ा दूध डिलीवरी सेवा
         </p>
       </footer>
 
