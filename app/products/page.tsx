@@ -26,15 +26,29 @@ export default function Products() {
     setCart(updatedCart);
 
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-    alert(item.name + " added to cart 🛒");
   };
 
-  // ✅ PLACE ORDER
+  // ✅ PLACE ORDER + SAVE ORDER HISTORY
   const placeOrder = () => {
-    alert("Order Placed ✅");
+    if (cart.length === 0) return;
 
-    // 👉 CLEAR CART AFTER ORDER
+    // 👉 OLD ORDERS
+    const oldOrders = localStorage.getItem("orders");
+    const orders = oldOrders ? JSON.parse(oldOrders) : [];
+
+    // 👉 NEW ORDER
+    const newOrder = {
+      items: cart,
+      date: new Date().toLocaleString(),
+    };
+
+    // 👉 SAVE
+    const updatedOrders = [newOrder, ...orders];
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+
+    alert("Order Placed Successfully ✅");
+
+    // 👉 CLEAR CART
     localStorage.removeItem("cart");
     setCart([]);
   };

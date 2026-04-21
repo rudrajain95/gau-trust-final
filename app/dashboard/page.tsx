@@ -100,6 +100,12 @@ export default function Dashboard() {
        🛒 Order Milk & Products
        </div>
        </a>
+       
+       <a href="/orders">
+       <div className="bg-white p-5 rounded-xl shadow cursor-pointer">
+       📦 My Orders
+       </div>
+       </a>
 
         <div className="bg-white p-5 rounded-xl shadow">
           📍 Saved Addresses
