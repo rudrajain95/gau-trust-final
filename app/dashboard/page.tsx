@@ -84,9 +84,11 @@ export default function Dashboard() {
       {/* MENU */}
       <div className="grid md:grid-cols-3 gap-4">
 
-        <div className="bg-white p-5 rounded-xl shadow">
-          📦 My Orders
-        </div>
+        <a href="/products">
+  <div className="bg-white p-5 rounded-xl shadow cursor-pointer hover:shadow-lg">
+    🛒 Order Milk & Products
+  </div>
+</a>
 
         <div className="bg-white p-5 rounded-xl shadow">
           📍 Saved Addresses
