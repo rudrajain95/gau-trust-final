@@ -6,9 +6,9 @@ export default function Orders() {
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("orders");
-    if (saved) {
-      setOrders(JSON.parse(saved));
+    const savedOrders = localStorage.getItem("orders");
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
     }
   }, []);
 
@@ -20,21 +20,59 @@ export default function Orders() {
       {orders.length === 0 ? (
         <p>No orders yet</p>
       ) : (
-        orders.map((order, i) => (
-          <div key={i} className="bg-white p-5 rounded-xl shadow mb-4">
+        orders.map((order, index) => {
+          const total = order.items.reduce(
+            (sum: number, item: any) => sum + item.price,
+            0
+          );
 
-            <p className="text-sm text-gray-500 mb-2">
-              {order.date}
-            </p>
+          return (
+            <div
+              key={index}
+              className="bg-white p-6 mb-5 rounded-xl shadow"
+            >
 
-            {order.items.map((item: any, j: number) => (
-              <p key={j}>
-                {item.name} - ₹{item.price}
-              </p>
-            ))}
+              {/* ORDER HEADER */}
+              <div className="flex justify-between mb-3">
+                <div>
+                  <p className="text-sm text-gray-500">
+                    Order ID: #{index + 1}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {order.date}
+                  </p>
+                </div>
 
-          </div>
-        ))
+                <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
+                  Pending
+                </span>
+              </div>
+
+              {/* ITEMS */}
+              <div className="mb-3">
+                {order.items.map((item: any, i: number) => (
+                  <p key={i}>
+                    {item.name} - ₹{item.price}
+                  </p>
+                ))}
+              </div>
+
+              {/* TOTAL */}
+              <div className="flex justify-between items-center mt-4">
+
+                <p className="font-bold">
+                  Total: ₹{total}
+                </p>
+
+                <button className="bg-black text-white px-4 py-2 rounded-lg">
+                  Track Order
+                </button>
+
+              </div>
+
+            </div>
+          );
+        })
       )}
 
     </div>
