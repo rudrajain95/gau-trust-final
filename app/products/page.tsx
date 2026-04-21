@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Products() {
   const [cart, setCart] = useState<any[]>([]);
@@ -12,9 +12,31 @@ export default function Products() {
     { name: "Butter", price: 250 },
   ];
 
+  // ✅ LOAD CART FROM LOCALSTORAGE
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+  // ✅ ADD TO CART + SAVE
   const addToCart = (item: any) => {
-    setCart([...cart, item]);
+    const updatedCart = [...cart, item];
+    setCart(updatedCart);
+
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
     alert(item.name + " added to cart 🛒");
+  };
+
+  // ✅ PLACE ORDER
+  const placeOrder = () => {
+    alert("Order Placed ✅");
+
+    // 👉 CLEAR CART AFTER ORDER
+    localStorage.removeItem("cart");
+    setCart([]);
   };
 
   return (
@@ -56,14 +78,16 @@ export default function Products() {
           <p>No items in cart</p>
         ) : (
           cart.map((item, i) => (
-            <p key={i}>{item.name} - ₹{item.price}</p>
+            <p key={i}>
+              {item.name} - ₹{item.price}
+            </p>
           ))
         )}
 
         {cart.length > 0 && (
           <button
             className="mt-4 bg-black text-white px-6 py-2 rounded-lg"
-            onClick={() => alert("Order Placed ✅")}
+            onClick={placeOrder}
           >
             Place Order
           </button>
