@@ -18,13 +18,25 @@ export default function Login() {
   };
 
   const handleVerifyOtp = () => {
-    if (!otp) {
-      alert("OTP दर्ज करें");
-      return;
-    }
+  if (!otp) {
+    alert("OTP दर्ज करें");
+    return;
+  }
 
-    alert("Login Successful ✅");
-    window.location.href = "/dashboard";
+  // 👉 USER DATA CREATE
+  const user = {
+    name: "Customer",
+    mobile: mobile,
+    address: "Chhatarpur"
+  };
+
+  // 👉 SAVE IN LOCALSTORAGE
+  localStorage.setItem("user", JSON.stringify(user));
+
+  alert("Login Successful ✅");
+
+  // 👉 REDIRECT
+  window.location.href = "/dashboard";
   };
 
   return (
