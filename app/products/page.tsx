@@ -12,46 +12,73 @@ export default function Products() {
     { name: "Butter", price: 250 },
   ];
 
-  // ✅ LOAD CART FROM LOCALSTORAGE
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
+    if (savedCart) setCart(JSON.parse(savedCart));
   }, []);
 
-  // ✅ ADD TO CART + SAVE
   const addToCart = (item: any) => {
     const updatedCart = [...cart, item];
     setCart(updatedCart);
-
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  // ✅ PLACE ORDER + SAVE ORDER HISTORY
-  const placeOrder = () => {
-    if (cart.length === 0) return;
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      document.body.appendChild(script);
+    });
+  };
 
-    // 👉 OLD ORDERS
-    const oldOrders = localStorage.getItem("orders");
-    const orders = oldOrders ? JSON.parse(oldOrders) : [];
+  const handlePayment = async () => {
+    const res = await loadRazorpay();
 
-    // 👉 NEW ORDER
-    const newOrder = {
-      items: cart,
-      date: new Date().toLocaleString(),
+    if (!res) {
+      alert("Razorpay SDK failed");
+      return;
+    }
+
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+    const order = await fetch("/api/payment", {
+      method: "POST",
+      body: JSON.stringify({ amount: total }),
+    }).then((res) => res.json());
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: "INR",
+      name: "Gau Trust Milk",
+      description: "Order Payment",
+      order_id: order.id,
+      handler: function (response: any) {
+        alert("Payment Successful ✅");
+
+        // SAVE ORDER
+        const oldOrders = localStorage.getItem("orders");
+        const orders = oldOrders ? JSON.parse(oldOrders) : [];
+
+        const newOrder = {
+          items: cart,
+          date: new Date().toLocaleString(),
+          paymentId: response.razorpay_payment_id,
+        };
+
+        localStorage.setItem("orders", JSON.stringify([newOrder, ...orders]));
+
+        localStorage.removeItem("cart");
+        window.location.href = "/orders";
+      },
+      theme: {
+        color: "#16a34a",
+      },
     };
 
-    // 👉 SAVE
-    const updatedOrders = [newOrder, ...orders];
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
-
-   alert("Order Placed Successfully ✅");
-   window.location.href = "/orders";
-
-    // 👉 CLEAR CART
-    localStorage.removeItem("cart");
-    setCart([]);
+    const paymentObject = new (window as any).Razorpay(options);
+    paymentObject.open();
   };
 
   return (
@@ -60,17 +87,10 @@ export default function Products() {
       <h1 className="text-3xl font-bold mb-6">Our Products</h1>
 
       <div className="grid md:grid-cols-4 gap-6">
-
         {products.map((item, index) => (
           <div key={index} className="bg-white p-5 rounded-xl shadow">
-
-            <h2 className="text-lg font-semibold mb-2">
-              {item.name}
-            </h2>
-
-            <p className="text-gray-600 mb-3">
-              ₹{item.price}
-            </p>
+            <h2 className="text-lg font-semibold mb-2">{item.name}</h2>
+            <p className="text-gray-600 mb-3">₹{item.price}</p>
 
             <button
               onClick={() => addToCart(item)}
@@ -78,38 +98,27 @@ export default function Products() {
             >
               Add to Cart
             </button>
-
           </div>
         ))}
-
       </div>
 
       {/* CART */}
       <div className="mt-10 bg-white p-6 rounded-xl shadow">
-
         <h2 className="text-xl font-bold mb-3">🛒 Cart</h2>
 
-        {cart.length === 0 ? (
-          <p>No items in cart</p>
-        ) : (
-          cart.map((item, i) => (
-            <p key={i}>
-              {item.name} - ₹{item.price}
-            </p>
-          ))
-        )}
+        {cart.map((item, i) => (
+          <p key={i}>{item.name} - ₹{item.price}</p>
+        ))}
 
         {cart.length > 0 && (
           <button
             className="mt-4 bg-black text-white px-6 py-2 rounded-lg"
-            onClick={placeOrder}
+            onClick={handlePayment}
           >
-            Place Order
+            Pay Now
           </button>
         )}
-
       </div>
-
     </div>
   );
 }
