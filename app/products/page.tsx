@@ -100,29 +100,36 @@ export default function Products() {
       description: "Milk Order Payment",
 
       handler: function (response: any) {
-        // ✅ SAVE ORDER
-        const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+  console.log("PAYMENT SUCCESS:", response);
 
-        const newOrder = {
-          id: orders.length + 1,
-          items: cart,
-          total,
-          status: "Pending",
-          date: new Date().toLocaleString(),
-        };
+  const orders = JSON.parse(localStorage.getItem("orders") || "[]");
 
-        localStorage.setItem(
-          "orders",
-          JSON.stringify([newOrder, ...orders])
-        );
+  const newOrder = {
+    id: Date.now(), // ✅ unique ID (important)
+    items: cart,
+    total: total,
+    status: "Confirmed",
+    paymentId: response.razorpay_payment_id,
+    date: new Date().toLocaleString(),
+  };
 
-        // CLEAR CART
-        localStorage.removeItem("cart");
-        setCart([]);
+  // ✅ SAVE FIRST
+  localStorage.setItem(
+    "orders",
+    JSON.stringify([newOrder, ...orders])
+  );
 
-        // REDIRECT
-        window.location.href = "/orders";
-      },
+  // ✅ CLEAR CART
+  localStorage.removeItem("cart");
+  setCart([]);
+
+  alert("Order Saved ✅");
+
+  // ✅ DELAY REDIRECT (IMPORTANT)
+  setTimeout(() => {
+    window.location.href = "/orders";
+  }, 1000);
+}
 
       theme: {
         color: "#16a34a",
