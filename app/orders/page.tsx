@@ -60,8 +60,8 @@ export default function Orders() {
               {/* TOTAL */}
               <div className="flex justify-between items-center mt-4">
 
-                <p className="font-bold">
-                  Total: ₹{total}
+                <p className="font-bold text-lg text-green-600">
+                 Total: ₹{total}
                 </p>
 
                 <button className="bg-black text-white px-4 py-2 rounded-lg">
