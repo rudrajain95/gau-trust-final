@@ -79,6 +79,7 @@ export default function Products() {
   };
 
   // ✅ PAYMENT
+  const currentCart = [...cart];
   const handlePayment = async () => {
     if (cart.length === 0) {
       alert("Cart empty");
@@ -100,34 +101,43 @@ export default function Products() {
       description: "Milk Order Payment",
 
       handler: function (response: any) {
-        console.log("PAYMENT SUCCESS:", response);
+  console.log("PAYMENT SUCCESS:", response);
 
-        const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+  const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-        const newOrder = {
-          id: Date.now(),
-          items: cart,
-          total: total,
-          status: "Confirmed",
-          paymentId: response.razorpay_payment_id,
-          date: new Date().toLocaleString(),
-        };
+  if (currentCart.length === 0) {
+    alert("Cart missing ❌");
+    return;
+  }
 
-        localStorage.setItem(
-          "orders",
-          JSON.stringify([newOrder, ...orders])
-        );
+  const orders = JSON.parse(localStorage.getItem("orders") || "[]");
 
-        localStorage.removeItem("cart");
-        setCart([]);
+  const newOrder = {
+    id: Date.now(),
+    items: currentCart,
+    total: currentCart.reduce(
+      (sum: number, item: any) => sum + item.price * item.qty,
+      0
+    ),
+    status: "Confirmed",
+    paymentId: response.razorpay_payment_id,
+    date: new Date().toLocaleString(),
+  };
 
-        alert("Order Saved ✅");
+  localStorage.setItem(
+    "orders",
+    JSON.stringify([newOrder, ...orders])
+  );
 
-        setTimeout(() => {
-          window.location.href = "/orders";
-        }, 1000);
-      }, // ✅🔥 YEH COMMA IMPORTANT HAI
+  localStorage.removeItem("cart");
+  setCart([]);
 
+  alert("Order Saved ✅");
+
+  setTimeout(() => {
+    window.location.href = "/orders";
+  }, 1000);
+},
       theme: {
         color: "#16a34a",
       },
