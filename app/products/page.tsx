@@ -26,7 +26,7 @@ export default function Products() {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  // ✅ ADD ITEM (WITH QUANTITY)
+  // ✅ ADD ITEM
   const addToCart = (product: any) => {
     const exist = cart.find((item) => item.id === product.id);
 
@@ -100,36 +100,33 @@ export default function Products() {
       description: "Milk Order Payment",
 
       handler: function (response: any) {
-  console.log("PAYMENT SUCCESS:", response);
+        console.log("PAYMENT SUCCESS:", response);
 
-  const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+        const orders = JSON.parse(localStorage.getItem("orders") || "[]");
 
-  const newOrder = {
-    id: Date.now(), // ✅ unique ID (important)
-    items: cart,
-    total: total,
-    status: "Confirmed",
-    paymentId: response.razorpay_payment_id,
-    date: new Date().toLocaleString(),
-  };
+        const newOrder = {
+          id: Date.now(),
+          items: cart,
+          total: total,
+          status: "Confirmed",
+          paymentId: response.razorpay_payment_id,
+          date: new Date().toLocaleString(),
+        };
 
-  // ✅ SAVE FIRST
-  localStorage.setItem(
-    "orders",
-    JSON.stringify([newOrder, ...orders])
-  );
+        localStorage.setItem(
+          "orders",
+          JSON.stringify([newOrder, ...orders])
+        );
 
-  // ✅ CLEAR CART
-  localStorage.removeItem("cart");
-  setCart([]);
+        localStorage.removeItem("cart");
+        setCart([]);
 
-  alert("Order Saved ✅");
+        alert("Order Saved ✅");
 
-  // ✅ DELAY REDIRECT (IMPORTANT)
-  setTimeout(() => {
-    window.location.href = "/orders";
-  }, 1000);
-}
+        setTimeout(() => {
+          window.location.href = "/orders";
+        }, 1000);
+      }, // ✅🔥 YEH COMMA IMPORTANT HAI
 
       theme: {
         color: "#16a34a",
@@ -147,9 +144,7 @@ export default function Products() {
         🛒 Our Products
       </h1>
 
-      {/* PRODUCTS */}
       <div className="grid md:grid-cols-4 gap-6">
-
         {products.map((item) => (
           <div
             key={item.id}
@@ -165,13 +160,12 @@ export default function Products() {
 
             <button
               onClick={() => addToCart(item)}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+              className="bg-green-600 text-white px-4 py-2 rounded-lg"
             >
               Add to Cart
             </button>
           </div>
         ))}
-
       </div>
 
       {/* CART */}
@@ -198,21 +192,9 @@ export default function Products() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => decreaseQty(item.id)}
-                    className="bg-gray-200 px-2 rounded"
-                  >
-                    -
-                  </button>
-
+                  <button onClick={() => decreaseQty(item.id)}>-</button>
                   <span>{item.qty}</span>
-
-                  <button
-                    onClick={() => increaseQty(item.id)}
-                    className="bg-gray-200 px-2 rounded"
-                  >
-                    +
-                  </button>
+                  <button onClick={() => increaseQty(item.id)}>+</button>
                 </div>
               </div>
             ))}
@@ -229,7 +211,6 @@ export default function Products() {
             </button>
           </>
         )}
-
       </div>
 
     </div>
