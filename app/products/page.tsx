@@ -6,73 +6,124 @@ export default function Products() {
   const [cart, setCart] = useState<any[]>([]);
 
   const products = [
-    { name: "Fresh Milk", price: 60 },
-    { name: "Paneer", price: 300 },
-    { name: "Curd", price: 80 },
-    { name: "Butter", price: 250 },
+    { id: 1, name: "Fresh Milk", price: 60 },
+    { id: 2, name: "Paneer", price: 300 },
+    { id: 3, name: "Curd", price: 80 },
+    { id: 4, name: "Butter", price: 250 },
   ];
 
+  // ✅ LOAD CART
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
-    if (savedCart) setCart(JSON.parse(savedCart));
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
   }, []);
 
-  const addToCart = (item: any) => {
-    const updatedCart = [...cart, item];
+  // ✅ SAVE CART
+  const updateCart = (updatedCart: any[]) => {
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
+  // ✅ ADD ITEM (WITH QUANTITY)
+  const addToCart = (product: any) => {
+    const exist = cart.find((item) => item.id === product.id);
+
+    if (exist) {
+      const updated = cart.map((item) =>
+        item.id === product.id
+          ? { ...item, qty: item.qty + 1 }
+          : item
+      );
+      updateCart(updated);
+    } else {
+      updateCart([...cart, { ...product, qty: 1 }]);
+    }
+  };
+
+  // ✅ INCREASE
+  const increaseQty = (id: number) => {
+    const updated = cart.map((item) =>
+      item.id === id ? { ...item, qty: item.qty + 1 } : item
+    );
+    updateCart(updated);
+  };
+
+  // ✅ DECREASE
+  const decreaseQty = (id: number) => {
+    const updated = cart
+      .map((item) =>
+        item.id === id ? { ...item, qty: item.qty - 1 } : item
+      )
+      .filter((item) => item.qty > 0);
+
+    updateCart(updated);
+  };
+
+  // ✅ TOTAL
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+
+  // ✅ LOAD RAZORPAY
   const loadRazorpay = () => {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
+  // ✅ PAYMENT
   const handlePayment = async () => {
-    const res = await loadRazorpay();
-
-    if (!res) {
-      alert("Razorpay SDK failed");
+    if (cart.length === 0) {
+      alert("Cart empty");
       return;
     }
 
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const res = await loadRazorpay();
 
-    const order = await fetch("/api/payment", {
-      method: "POST",
-      body: JSON.stringify({ amount: total }),
-    }).then((res) => res.json());
+    if (!res) {
+      alert("Razorpay failed to load");
+      return;
+    }
 
-    const options = {
+    const options: any = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: order.amount,
+      amount: total * 100,
       currency: "INR",
       name: "Gau Trust Milk",
-      description: "Order Payment",
-      order_id: order.id,
-      handler: function (response: any) {
-        alert("Payment Successful ✅");
+      description: "Milk Order Payment",
 
-        // SAVE ORDER
-        const oldOrders = localStorage.getItem("orders");
-        const orders = oldOrders ? JSON.parse(oldOrders) : [];
+      handler: function (response: any) {
+        // ✅ SAVE ORDER
+        const orders = JSON.parse(localStorage.getItem("orders") || "[]");
 
         const newOrder = {
+          id: orders.length + 1,
           items: cart,
+          total,
+          status: "Pending",
           date: new Date().toLocaleString(),
-          paymentId: response.razorpay_payment_id,
         };
 
-        localStorage.setItem("orders", JSON.stringify([newOrder, ...orders]));
+        localStorage.setItem(
+          "orders",
+          JSON.stringify([newOrder, ...orders])
+        );
 
+        // CLEAR CART
         localStorage.removeItem("cart");
+        setCart([]);
+
+        // REDIRECT
         window.location.href = "/orders";
       },
+
       theme: {
         color: "#16a34a",
       },
@@ -85,41 +136,95 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6">
 
-      <h1 className="text-3xl font-bold mb-6">Our Products</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        🛒 Our Products
+      </h1>
 
+      {/* PRODUCTS */}
       <div className="grid md:grid-cols-4 gap-6">
-        {products.map((item, index) => (
-          <div key={index} className="bg-white p-5 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-2">{item.name}</h2>
-            <p className="text-gray-600 mb-3">₹{item.price}</p>
+
+        {products.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition"
+          >
+            <h2 className="text-lg font-semibold mb-2">
+              {item.name}
+            </h2>
+
+            <p className="text-gray-600 mb-3">
+              ₹{item.price}
+            </p>
 
             <button
               onClick={() => addToCart(item)}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg"
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
             >
               Add to Cart
             </button>
           </div>
         ))}
+
       </div>
 
       {/* CART */}
       <div className="mt-10 bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold mb-3">🛒 Cart</h2>
 
-        {cart.map((item, i) => (
-          <p key={i}>{item.name} - ₹{item.price}</p>
-        ))}
+        <h2 className="text-xl font-bold mb-4">
+          🛍️ Cart
+        </h2>
 
-        {cart.length > 0 && (
-          <button
-            className="mt-4 bg-black text-white px-6 py-2 rounded-lg"
-            onClick={handlePayment}
-          >
-            Pay Now
-          </button>
+        {cart.length === 0 ? (
+          <p>No items in cart</p>
+        ) : (
+          <>
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between items-center mb-4 border-b pb-2"
+              >
+                <div>
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-sm text-gray-500">
+                    ₹{item.price} × {item.qty}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => decreaseQty(item.id)}
+                    className="bg-gray-200 px-2 rounded"
+                  >
+                    -
+                  </button>
+
+                  <span>{item.qty}</span>
+
+                  <button
+                    onClick={() => increaseQty(item.id)}
+                    className="bg-gray-200 px-2 rounded"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <div className="mt-4 font-bold text-lg">
+              Total: ₹{total}
+            </div>
+
+            <button
+              onClick={handlePayment}
+              className="mt-4 w-full bg-black text-white py-3 rounded-lg"
+            >
+              Pay Now
+            </button>
+          </>
         )}
+
       </div>
+
     </div>
   );
 }
