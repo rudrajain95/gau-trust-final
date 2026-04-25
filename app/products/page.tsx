@@ -46,7 +46,8 @@ export default function Products() {
     const updatedOrders = [newOrder, ...orders];
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
 
-    alert("Order Placed Successfully ✅");
+   alert("Order Placed Successfully ✅");
+   window.location.href = "/orders";
 
     // 👉 CLEAR CART
     localStorage.removeItem("cart");
