@@ -1,18 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+};
+
+type CartItem = Product & {
+  qty: number;
+};
 
 export default function Products() {
-  const [cart, setCart] = useState<any[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-  const products = [
+  const products: Product[] = [
     { id: 1, name: "Fresh Milk", price: 60 },
     { id: 2, name: "Paneer", price: 300 },
     { id: 3, name: "Curd", price: 80 },
     { id: 4, name: "Butter", price: 250 },
   ];
 
-  // ✅ LOAD CART
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -20,21 +29,17 @@ export default function Products() {
     }
   }, []);
 
-  // ✅ SAVE CART
-  const updateCart = (updatedCart: any[]) => {
+  const updateCart = (updatedCart: CartItem[]) => {
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  // ✅ ADD ITEM
-  const addToCart = (product: any) => {
+  const addToCart = (product: Product) => {
     const exist = cart.find((item) => item.id === product.id);
 
     if (exist) {
       const updated = cart.map((item) =>
-        item.id === product.id
-          ? { ...item, qty: item.qty + 1 }
-          : item
+        item.id === product.id ? { ...item, qty: item.qty + 1 } : item
       );
       updateCart(updated);
     } else {
@@ -42,7 +47,6 @@ export default function Products() {
     }
   };
 
-  // ✅ INCREASE
   const increaseQty = (id: number) => {
     const updated = cart.map((item) =>
       item.id === id ? { ...item, qty: item.qty + 1 } : item
@@ -50,7 +54,6 @@ export default function Products() {
     updateCart(updated);
   };
 
-  // ✅ DECREASE
   const decreaseQty = (id: number) => {
     const updated = cart
       .map((item) =>
@@ -61,15 +64,15 @@ export default function Products() {
     updateCart(updated);
   };
 
-  // ✅ TOTAL
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  // ✅ LOAD RAZORPAY
   const loadRazorpay = () => {
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve(true);
@@ -78,66 +81,59 @@ export default function Products() {
     });
   };
 
-  // ✅ PAYMENT
-  const currentCart = [...cart];
   const handlePayment = async () => {
     if (cart.length === 0) {
       alert("Cart empty");
       return;
     }
 
-    const res = await loadRazorpay();
+    const razorpayLoaded = await loadRazorpay();
 
-    if (!res) {
+    if (!razorpayLoaded) {
       alert("Razorpay failed to load");
       return;
     }
 
+    const cartBeforePayment = [...cart];
+    const totalBeforePayment = total;
+
     const options: any = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: total * 100,
+      amount: totalBeforePayment * 100,
       currency: "INR",
       name: "Gau Trust Milk",
       description: "Milk Order Payment",
 
       handler: function (response: any) {
-  console.log("PAYMENT SUCCESS:", response);
+        const oldOrders = JSON.parse(localStorage.getItem("orders") || "[]");
 
-  const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const newOrder = {
+          id: Date.now(),
+          items: cartBeforePayment,
+          total: totalBeforePayment,
+          status: "Paid",
+          paymentStatus: "Payment Successful",
+          paymentId: response.razorpay_payment_id,
+          date: new Date().toLocaleString(),
+        };
 
-  if (currentCart.length === 0) {
-    alert("Cart missing ❌");
-    return;
-  }
+        localStorage.setItem(
+          "orders",
+          JSON.stringify([newOrder, ...oldOrders])
+        );
 
-  const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+        localStorage.removeItem("cart");
+        setCart([]);
 
-  const newOrder = {
-    id: Date.now(),
-    items: currentCart,
-    total: currentCart.reduce(
-      (sum: number, item: any) => sum + item.price * item.qty,
-      0
-    ),
-    status: "Confirmed",
-    paymentId: response.razorpay_payment_id,
-    date: new Date().toLocaleString(),
-  };
+        alert("Payment Successful & Order Saved ✅");
 
-  localStorage.setItem(
-    "orders",
-    JSON.stringify([newOrder, ...orders])
-  );
+        window.location.href = "/orders";
+      },
 
-  localStorage.removeItem("cart");
-  setCart([]);
+      prefill: {
+        contact: "7024030008",
+      },
 
-  alert("Order Saved ✅");
-
-  setTimeout(() => {
-    window.location.href = "/orders";
-  }, 1000);
-},
       theme: {
         color: "#16a34a",
       },
@@ -149,10 +145,7 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6">
-
-      <h1 className="text-3xl font-bold mb-6">
-        🛒 Our Products
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">🛒 Our Products</h1>
 
       <div className="grid md:grid-cols-4 gap-6">
         {products.map((item) => (
@@ -160,13 +153,9 @@ export default function Products() {
             key={item.id}
             className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition"
           >
-            <h2 className="text-lg font-semibold mb-2">
-              {item.name}
-            </h2>
+            <h2 className="text-lg font-semibold mb-2">{item.name}</h2>
 
-            <p className="text-gray-600 mb-3">
-              ₹{item.price}
-            </p>
+            <p className="text-gray-600 mb-3">₹{item.price}</p>
 
             <button
               onClick={() => addToCart(item)}
@@ -178,12 +167,8 @@ export default function Products() {
         ))}
       </div>
 
-      {/* CART */}
       <div className="mt-10 bg-white p-6 rounded-xl shadow">
-
-        <h2 className="text-xl font-bold mb-4">
-          🛍️ Cart
-        </h2>
+        <h2 className="text-xl font-bold mb-4">🛍️ Cart</h2>
 
         {cart.length === 0 ? (
           <p>No items in cart</p>
@@ -202,16 +187,26 @@ export default function Products() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button onClick={() => decreaseQty(item.id)}>-</button>
+                  <button
+                    onClick={() => decreaseQty(item.id)}
+                    className="bg-gray-200 px-3 py-1 rounded"
+                  >
+                    -
+                  </button>
+
                   <span>{item.qty}</span>
-                  <button onClick={() => increaseQty(item.id)}>+</button>
+
+                  <button
+                    onClick={() => increaseQty(item.id)}
+                    className="bg-gray-200 px-3 py-1 rounded"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             ))}
 
-            <div className="mt-4 font-bold text-lg">
-              Total: ₹{total}
-            </div>
+            <div className="mt-4 font-bold text-lg">Total: ₹{total}</div>
 
             <button
               onClick={handlePayment}
@@ -222,7 +217,6 @@ export default function Products() {
           </>
         )}
       </div>
-
     </div>
   );
 }
