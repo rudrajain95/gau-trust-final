@@ -98,46 +98,50 @@ export default function Products() {
     const totalBeforePayment = total;
 
     const options: any = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: totalBeforePayment * 100,
-      currency: "INR",
-      name: "Gau Trust Milk",
-      description: "Milk Order Payment",
+  key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+  amount: totalBeforePayment * 100,
+  currency: "INR",
+  name: "Gau Trust Milk",
+  description: "Milk Order Payment",
 
-      handler: function (response: any) {
-        const oldOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+  handler: async function (response: any) {
+    const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-        const newOrder = {
-          id: Date.now(),
-          items: cartBeforePayment,
-          total: totalBeforePayment,
-          status: "Paid",
-          paymentStatus: "Payment Successful",
-          paymentId: response.razorpay_payment_id,
-          date: new Date().toLocaleString(),
-        };
+    if (currentCart.length === 0) {
+      alert("Cart missing ❌");
+      return;
+    }
 
-        localStorage.setItem(
-          "orders",
-          JSON.stringify([newOrder, ...oldOrders])
-        );
-
-        localStorage.removeItem("cart");
-        setCart([]);
-
-        alert("Payment Successful & Order Saved ✅");
-
-        window.location.href = "/orders";
-      },
-
-      prefill: {
-        contact: "7024030008",
-      },
-
-      theme: {
-        color: "#16a34a",
-      },
+    const newOrder = {
+      items: currentCart,
+      total: currentCart.reduce(
+        (sum: number, item: any) => sum + item.price * item.qty,
+        0
+      ),
+      paymentId: response.razorpay_payment_id,
+      status: "Confirmed",
     };
+
+    await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newOrder),
+    });
+
+    localStorage.removeItem("cart");
+    setCart([]);
+
+    alert("Order Saved ✅");
+
+    window.location.href = "/orders";
+  },
+
+  theme: {
+    color: "#16a34a",
+  },
+};
 
     const paymentObject = new (window as any).Razorpay(options);
     paymentObject.open();
