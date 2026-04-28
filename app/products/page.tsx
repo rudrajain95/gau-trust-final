@@ -122,16 +122,17 @@ export default function Products() {
 
           // 🔥 API CALL + DEBUG
           const res = await fetch("/api/orders", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newOrder),
-          });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(newOrder),
+});
 
-          const data = await res.json();
-          console.log("API RESPONSE:", data);
+console.log("STATUS:", res.status);
 
+const data = await res.json();
+console.log("DATA:", data);
           if (!res.ok) {
             alert("Order save failed ❌");
             return;
