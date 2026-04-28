@@ -1,40 +1,20 @@
-import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
 
 const uri = process.env.MONGODB_URI!;
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please add MONGODB_URI");
-}
-
-if (process.env.NODE_ENV === "development") {
-  if (!(global as any)._mongoClientPromise) {
-    client = new MongoClient(uri);
-    (global as any)._mongoClientPromise = client.connect();
-  }
-  clientPromise = (global as any)._mongoClientPromise;
-} else {
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
-}
+const client = new MongoClient(uri);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const client = await clientPromise;
-    const db = client.db("gau-trust");
+    await client.connect();
+    const db = client.db("test"); // ⚠️ IMPORTANT (change if needed)
 
-    await db.collection("orders").insertOne({
-      ...body,
-      createdAt: new Date(),
-    });
+    const result = await db.collection("orders").insertOne(body);
 
-    return NextResponse.json({ success: true });
+    return Response.json({ success: true, result });
   } catch (error) {
-    console.error("DB ERROR:", error);
-    return NextResponse.json({ error: "DB error" }, { status: 500 });
+    console.error("ORDER SAVE ERROR:", error);
+    return Response.json({ success: false, error });
   }
 }
