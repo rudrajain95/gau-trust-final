@@ -94,54 +94,67 @@ export default function Products() {
       return;
     }
 
-    const cartBeforePayment = [...cart];
-    const totalBeforePayment = total;
-
     const options: any = {
-  key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-  amount: totalBeforePayment * 100,
-  currency: "INR",
-  name: "Gau Trust Milk",
-  description: "Milk Order Payment",
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: total * 100,
+      currency: "INR",
+      name: "Gau Trust Milk",
+      description: "Milk Order Payment",
 
-  handler: async function (response: any) {
-    const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      handler: async function (response: any) {
+        try {
+          const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    if (currentCart.length === 0) {
-      alert("Cart missing ❌");
-      return;
-    }
+          if (currentCart.length === 0) {
+            alert("Cart missing ❌");
+            return;
+          }
 
-    const newOrder = {
-      items: currentCart,
-      total: currentCart.reduce(
-        (sum: number, item: any) => sum + item.price * item.qty,
-        0
-      ),
-      paymentId: response.razorpay_payment_id,
-      status: "Confirmed",
-    };
+          const newOrder = {
+            items: currentCart,
+            total: currentCart.reduce(
+              (sum: number, item: any) => sum + item.price * item.qty,
+              0
+            ),
+            paymentId: response.razorpay_payment_id,
+            status: "Confirmed",
+          };
 
-    await fetch("/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+          // 🔥 API CALL + DEBUG
+          const res = await fetch("/api/orders", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newOrder),
+          });
+
+          const data = await res.json();
+          console.log("API RESPONSE:", data);
+
+          if (!res.ok) {
+            alert("Order save failed ❌");
+            return;
+          }
+
+          // ✅ SUCCESS
+          localStorage.removeItem("cart");
+          setCart([]);
+
+          alert("Order Saved ✅");
+
+          window.location.href = "/orders";
+
+        } catch (error) {
+          console.error("SAVE ERROR:", error);
+          alert("Something went wrong ❌");
+        }
       },
-      body: JSON.stringify(newOrder),
-    });
 
-    localStorage.removeItem("cart");
-    setCart([]);
-
-    alert("Order Saved ✅");
-
-    window.location.href = "/orders";
-  },
-
-  theme: {
-    color: "#16a34a",
-  },
-};
+      theme: {
+        color: "#16a34a",
+      },
+    };
 
     const paymentObject = new (window as any).Razorpay(options);
     paymentObject.open();
