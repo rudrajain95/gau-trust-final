@@ -2,68 +2,67 @@
 
 import { useState } from "react";
 
-export default function Login() {
+export default function LoginPage() {
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
 
-  const handleSendOtp = () => {
-    if (!mobile) {
-      alert("कृपया मोबाइल नंबर दर्ज करें");
-      return;
+  const sendOtp = async () => {
+    const res = await fetch("/api/send-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ mobile }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("OTP sent (check console)");
+      setStep(2);
     }
-
-    alert("OTP भेजा गया (Demo)");
-    setStep(2);
   };
 
-  const handleVerifyOtp = () => {
-  if (!otp) {
-    alert("OTP दर्ज करें");
-    return;
-  }
+  const verifyOtp = async () => {
+    const res = await fetch("/api/verify-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ mobile, otp }),
+    });
 
-  // 👉 USER DATA CREATE
-  const user = {
-    name: "Customer",
-    mobile: mobile,
-    address: "Chhatarpur"
-  };
+    const data = await res.json();
 
-  // 👉 SAVE IN LOCALSTORAGE
-  localStorage.setItem("user", JSON.stringify(user));
-
-  alert("Login Successful ✅");
-
-  // 👉 REDIRECT
-  window.location.href = "/dashboard";
+    if (data.success) {
+      alert("Login Success ✅");
+      localStorage.setItem("user", mobile);
+      window.location.href = "/products";
+    } else {
+      alert("Invalid OTP ❌");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-6 rounded-xl shadow w-80">
 
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
-
-        <h2 className="text-2xl font-bold text-center mb-2">
-          Secure Login
-        </h2>
-
-        <p className="text-center text-gray-500 mb-6">
-          मोबाइल नंबर से लॉगिन करें
-        </p>
+        <h2 className="text-xl font-bold mb-4">📱 Login</h2>
 
         {step === 1 && (
           <>
             <input
               type="text"
-              placeholder="Enter Mobile Number"
-              className="w-full mb-4 p-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              placeholder="Enter mobile"
+              value={mobile}
               onChange={(e) => setMobile(e.target.value)}
+              className="border p-2 w-full mb-3"
             />
 
             <button
-              onClick={handleSendOtp}
-              className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700"
+              onClick={sendOtp}
+              className="bg-green-600 text-white w-full py-2 rounded"
             >
               Send OTP
             </button>
@@ -75,28 +74,20 @@ export default function Login() {
             <input
               type="text"
               placeholder="Enter OTP"
-              className="w-full mb-4 p-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              value={otp}
               onChange={(e) => setOtp(e.target.value)}
+              className="border p-2 w-full mb-3"
             />
 
             <button
-              onClick={handleVerifyOtp}
-              className="w-full bg-black text-white py-3 rounded-lg font-semibold"
+              onClick={verifyOtp}
+              className="bg-black text-white w-full py-2 rounded"
             >
-              Verify & Login
+              Verify OTP
             </button>
           </>
         )}
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          नया account?{" "}
-          <a href="/signup" className="text-green-600 font-semibold">
-            Create Account
-          </a>
-        </p>
-
       </div>
-
     </div>
   );
 }
