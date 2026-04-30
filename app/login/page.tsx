@@ -7,29 +7,22 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
 
-  const sendOtp = async () => {
+  const sendOTP = async () => {
     const res = await fetch("/api/send-otp", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ mobile }),
     });
 
     const data = await res.json();
+    console.log(data);
 
-    if (data.success) {
-      alert("OTP sent (check console)");
-      setStep(2);
-    }
+    alert("OTP Sent!");
+    setStep(2);
   };
 
-  const verifyOtp = async () => {
+  const verifyOTP = async () => {
     const res = await fetch("/api/verify-otp", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ mobile, otp }),
     });
 
@@ -37,32 +30,29 @@ export default function LoginPage() {
 
     if (data.success) {
       alert("Login Success ✅");
-      localStorage.setItem("user", mobile);
-      window.location.href = "/products";
+      window.location.href = "/dashboard";
     } else {
-      alert("Invalid OTP ❌");
+      alert("Wrong OTP ❌");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-xl shadow w-80">
-
-        <h2 className="text-xl font-bold mb-4">📱 Login</h2>
+      <div className="bg-white p-8 rounded-xl shadow w-96">
+        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
 
         {step === 1 && (
           <>
             <input
               type="text"
-              placeholder="Enter mobile"
+              placeholder="Mobile Number"
+              className="w-full border p-2 mb-4"
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
-              className="border p-2 w-full mb-3"
             />
-
             <button
-              onClick={sendOtp}
-              className="bg-green-600 text-white w-full py-2 rounded"
+              onClick={sendOTP}
+              className="w-full bg-green-600 text-white py-2 rounded"
             >
               Send OTP
             </button>
@@ -74,14 +64,13 @@ export default function LoginPage() {
             <input
               type="text"
               placeholder="Enter OTP"
+              className="w-full border p-2 mb-4"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              className="border p-2 w-full mb-3"
             />
-
             <button
-              onClick={verifyOtp}
-              className="bg-black text-white w-full py-2 rounded"
+              onClick={verifyOTP}
+              className="w-full bg-blue-600 text-white py-2 rounded"
             >
               Verify OTP
             </button>
