@@ -3,13 +3,28 @@
 import { useEffect, useState } from "react";
 
 export default function AdminPage() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [password, setPassword] = useState("");
   const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Delivery boys list (later DB se aayega)
-  const deliveryBoys = ["Ravi", "Aman", "Suresh"];
+  const adminLogin = () => {
+    if (password === "admin123") {
+      localStorage.setItem("adminLogin", "true");
+      setIsAdmin(true);
+      fetchOrders();
+    } else {
+      alert("Wrong admin password");
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("adminLogin");
+    setIsAdmin(false);
+  };
 
   const fetchOrders = () => {
+    setLoading(true);
     fetch("/api/get-orders")
       .then((res) => res.json())
       .then((data) => {
@@ -19,7 +34,11 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    const login = localStorage.getItem("adminLogin");
+    if (login === "true") {
+      setIsAdmin(true);
+      fetchOrders();
+    }
   }, []);
 
   const updateStatus = async (id: string, status: string) => {
@@ -34,98 +53,105 @@ export default function AdminPage() {
     fetchOrders();
   };
 
-  // ✅ NEW: Assign Delivery Boy
-  const updateAssign = async (id: string, deliveryBoy: string) => {
-    await fetch("/api/assign-order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id, deliveryBoy }),
-    });
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-2xl shadow w-96">
+          <h1 className="text-2xl font-bold mb-4 text-center">
+            Admin Login
+          </h1>
 
-    fetchOrders();
-  };
+          <input
+            type="password"
+            placeholder="Enter Admin Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="border p-3 w-full mb-4 rounded"
+          />
 
-  if (loading) return <p className="p-6">Loading...</p>;
+          <button
+            onClick={adminLogin}
+            className="bg-black text-white w-full py-3 rounded"
+          >
+            Login
+          </button>
+
+          <p className="text-xs text-gray-500 mt-4 text-center">
+            Temporary password: admin123
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">🧑‍💼 Admin Panel</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">🧑‍💼 Admin Panel</h1>
 
-      {orders.length === 0 ? (
+        <button
+          onClick={logout}
+          className="bg-red-600 text-white px-4 py-2 rounded"
+        >
+          Logout
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <a href="/admin/products" className="bg-white p-6 rounded-xl shadow">
+          <h2 className="font-bold text-lg">🛒 Product Management</h2>
+          <p className="text-gray-500">Add / delete products</p>
+        </a>
+
+        <a href="/orders" className="bg-white p-6 rounded-xl shadow">
+          <h2 className="font-bold text-lg">📦 Customer Orders</h2>
+          <p className="text-gray-500">View order history</p>
+        </a>
+
+        <a href="/delivery" className="bg-white p-6 rounded-xl shadow">
+          <h2 className="font-bold text-lg">🚚 Delivery Panel</h2>
+          <p className="text-gray-500">Delivery boy orders</p>
+        </a>
+      </div>
+
+      <h2 className="text-2xl font-bold mb-4">Recent Orders</h2>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : orders.length === 0 ? (
         <p>No orders found</p>
       ) : (
         orders.map((order) => (
-          <div
-            key={order._id}
-            className="bg-white p-5 mb-5 rounded-xl shadow"
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold text-lg">Order ID: {order._id}</p>
-                <p>
-                  Status: <b>{order.status}</b>
-                </p>
-                <p>Total: ₹{order.total}</p>
+          <div key={order._id} className="bg-white p-5 mb-5 rounded-xl shadow">
+            <p className="font-bold">Order ID: {order._id}</p>
+            <p>Status: <b>{order.status}</b></p>
+            <p>Total: ₹{order.total}</p>
 
-                {/* ✅ Assigned Delivery Boy */}
-                <p className="text-sm text-gray-500 mt-1">
-                  Assigned: {order.assignedTo || "Not Assigned"}
-                </p>
-              </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => updateStatus(order._id, "Preparing")}
+                className="bg-yellow-500 text-white px-3 py-1 rounded"
+              >
+                Preparing
+              </button>
 
-              <div className="flex flex-col gap-2 items-end">
+              <button
+                onClick={() => updateStatus(order._id, "Out for Delivery")}
+                className="bg-blue-500 text-white px-3 py-1 rounded"
+              >
+                Out
+              </button>
 
-                {/* ✅ STATUS BUTTONS */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => updateStatus(order._id, "Preparing")}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded"
-                  >
-                    Preparing
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      updateStatus(order._id, "Out for Delivery")
-                    }
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                  >
-                    Out
-                  </button>
-
-                  <button
-                    onClick={() => updateStatus(order._id, "Delivered")}
-                    className="bg-green-600 text-white px-3 py-1 rounded"
-                  >
-                    Delivered
-                  </button>
-                </div>
-
-                {/* ✅ NEW: Assign Dropdown */}
-                <select
-                  onChange={(e) =>
-                    updateAssign(order._id, e.target.value)
-                  }
-                  className="border px-2 py-1 rounded"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Assign Delivery
-                  </option>
-                  {deliveryBoys.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <button
+                onClick={() => updateStatus(order._id, "Delivered")}
+                className="bg-green-600 text-white px-3 py-1 rounded"
+              >
+                Delivered
+              </button>
             </div>
 
-            {/* ITEMS */}
             <div className="mt-3 border-t pt-3">
-              {order.items.map((item: any, i: number) => (
+              {order.items?.map((item: any, i: number) => (
                 <p key={i}>
                   {item.name} × {item.qty}
                 </p>
