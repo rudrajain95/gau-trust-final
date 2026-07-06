@@ -13,14 +13,31 @@ export default function LoginPage() {
       return;
     }
 
+    if (mobile.length !== 10) {
+      alert("Please enter valid 10 digit mobile number");
+      return;
+    }
+
     alert("Testing OTP: 123456");
     setStep(2);
   };
 
   const verifyOtp = () => {
     if (otp === "123456") {
+      // Dashboard ke liye user data save hoga
+      const user = {
+        name: "Gau Trust Customer",
+        mobile: mobile,
+        address: "Address not added yet",
+      };
+
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Future use ke liye mobile bhi save kar dete hain
       localStorage.setItem("customerMobile", mobile);
+
       alert("Login Success ✅");
+
       window.location.href = "/dashboard";
     } else {
       alert("Wrong OTP ❌");
@@ -46,11 +63,12 @@ export default function LoginPage() {
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
               className="border p-3 w-full mb-4 rounded"
+              maxLength={10}
             />
 
             <button
               onClick={sendOtp}
-              className="bg-green-600 text-white w-full py-3 rounded"
+              className="bg-green-600 text-white w-full py-3 rounded hover:bg-green-700"
             >
               Send OTP
             </button>
@@ -65,17 +83,18 @@ export default function LoginPage() {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               className="border p-3 w-full mb-4 rounded"
+              maxLength={6}
             />
 
             <button
               onClick={verifyOtp}
-              className="bg-black text-white w-full py-3 rounded"
+              className="bg-black text-white w-full py-3 rounded hover:bg-gray-800"
             >
               Verify OTP
             </button>
 
             <p className="text-xs text-gray-500 mt-3 text-center">
-              Testing OTP: 123456
+              Testing OTP : <b>123456</b>
             </p>
           </>
         )}
